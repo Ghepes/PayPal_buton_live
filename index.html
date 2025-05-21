@@ -1,0 +1,54 @@
+<div id="smart-button-container">
+  <div style="text-align: center;">
+    <div id="paypal-button-container"></div>
+  </div>
+</div>
+
+<script>
+  // 👉 Înlocuiește cu orice alt client ID
+  const PAYPAL_CLIENT_ID = "ASx49IFxdiQjrBPqN04l4GO35kX2f8kSGIccAXaYNrsPKruDKaGqdSB3An7x8WhqYaFeHgUUBsWE6oVI";
+
+  // 👉 Injectăm scriptul SDK dinamic
+  const sdkScript = document.createElement("script");
+  sdkScript.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&enable-funding=venmo&currency=EUR`;
+  sdkScript.setAttribute("data-sdk-integration-source", "button-factory");
+  sdkScript.onload = initPayPalButton; // se apelează doar după ce se încarcă scriptul complet
+  document.head.appendChild(sdkScript);
+
+  function initPayPalButton() {
+    paypal.Buttons({
+      style: {
+        shape: 'pill',
+        color: 'gold',
+        layout: 'horizontal',
+        label: 'paypal',
+        tagline: true
+      },
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              currency_code: "EUR",
+              value: 1.2,
+              breakdown: {
+                item_total: { currency_code: "EUR", value: 1 },
+                shipping: { currency_code: "EUR", value: 0 },
+                tax_total: { currency_code: "EUR", value: 0.2 }
+              }
+            }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(orderData) {
+          console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+          const element = document.getElementById('paypal-button-container');
+          element.innerHTML = '<h3>Thank you for your payment!</h3>';
+        });
+      },
+      onError: function(err) {
+        console.log(err);
+      }
+    }).render('#paypal-button-container');
+  }
+</script>
