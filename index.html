@@ -1,23 +1,90 @@
-<!DOCTIPE html>
-<html lang="en" data-color-mode="dark" data-light-theme="dark" data-dark-theme="dark" data-a11y-animated-images="system" data-a11y-link-underlines="false" data-turbo-loaded="">
-  <head>
-<div id="smart-button-container">
-  <div style="text-align: center;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PayPal test Demo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f0f0f0;
+    }
+
+    .product {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .images {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .images img {
+      width: 100px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    select {
+      margin-bottom: 20px;
+      padding: 8px;
+      font-size: 16px;
+    }
+
+    footer {
+      margin-top: 30px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="product">
+    <h2>Model: Next personalizat</h2>
+
+    <div class="images">
+      <img src="https://via.placeholder.com/100x100?text=Img1" alt="img1">
+      <img src="https://via.placeholder.com/100x100?text=Img2" alt="img2">
+      <img src="https://via.placeholder.com/100x100?text=Img3" alt="img3">
+    </div>
+
+    <label for="priceOption">Alege mărimea:</label>
+    <select id="priceOption">
+      <option value="10">S - 10 EUR</option>
+      <option value="12">M - 12 EUR</option>
+      <option value="14">L - 14 EUR</option>
+    </select>
+
     <div id="paypal-button-container"></div>
   </div>
-</div>
-  </head>
-  <body>
 
-  <script>
-  // 👉 Înlocuiește cu orice alt client ID
+    <!-- Footer -->
+  <footer>
+    <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal Icon">
+    <span>Next PayPal - Next product</span>
+  </footer>
+
+  
+<script> // 👉 Change with your paypal client ID
   const PAYPAL_CLIENT_ID = "ASx49IFxdiQjrBPqN04l4GO35kX2f8kSGIccAXaYNrsPKruDKaGqdSB3An7x8WhqYaFeHgUUBsWE6oVI";
 
-  // 👉 Injectăm scriptul SDK dinamic
   const sdkScript = document.createElement("script");
   sdkScript.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&enable-funding=venmo&currency=EUR`;
-  sdkScript.setAttribute("data-sdk-integration-source", "button-factory");
-  sdkScript.onload = initPayPalButton; // se apelează doar după ce se încarcă scriptul complet
+  sdkScript.onload = initPayPalButton;
   document.head.appendChild(sdkScript);
 
   function initPayPalButton() {
@@ -27,19 +94,16 @@
         color: 'gold',
         layout: 'horizontal',
         label: 'paypal',
-        tagline: true
+        tagline: false
       },
       createOrder: function(data, actions) {
+        const selectedPrice = document.getElementById('priceOption').value;
+
         return actions.order.create({
           purchase_units: [{
             amount: {
               currency_code: "EUR",
-              value: 1.2,
-              breakdown: {
-                item_total: { currency_code: "EUR", value: 1 },
-                shipping: { currency_code: "EUR", value: 0 },
-                tax_total: { currency_code: "EUR", value: 0.2 }
-              }
+              value: selectedPrice
             }
           }]
         });
@@ -47,18 +111,17 @@
       onApprove: function(data, actions) {
         return actions.order.capture().then(function(orderData) {
           console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
-          const element = document.getElementById('paypal-button-container');
-          element.innerHTML = '<h3>Thank you for your payment!</h3>';
+          document.getElementById('paypal-button-container').innerHTML = '<h3>Plată efectuată cu succes!</h3>';
         });
       },
       onError: function(err) {
-        console.log(err);
+        console.error(err);
       }
     }).render('#paypal-button-container');
   }
 </script>
-    </body>
-  <footer>
-    MY Footer Paypal
-  </footer>
+
+</body>
 </html>
+
+
